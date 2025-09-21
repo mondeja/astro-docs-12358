@@ -1,0 +1,31 @@
+name: Reproduce withstro/docs PR 12358
+on:
+  - workflow_dispatch
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Start astro project
+        run: npm create astro@latest ./my-project -- --template minimal --yes
+      - name: Check project
+        run: |
+          # Show Node.js version
+          node --version
+          # Show TypeScript version
+          tsc --version
+          # Run TypeScript compiler (should be OK)
+          tsc
+      - name: Add import alias to tsconfig.json
+        run: |
+          # Edit tsconfig.json
+          '.compilerOptions.paths = {"@components/*": ["src/components/*"]}' tsconfig.json > tsconfig.tmp && mv tsconfig.tmp tsconfig.json
+          # Show new tsconfig.json content
+          cat tsconfig.json
+      - name: Check project again
+        run: |
+          # Run TypeScript compiler (fails)
+          tsc
