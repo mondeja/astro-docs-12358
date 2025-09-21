@@ -1,6 +1,7 @@
-name: Reproduce withstro/docs PR 12358
+name: Reproduce withastro/docs PR 12358
 on:
   - workflow_dispatch
+  - push
 
 jobs:
   reproduce:
@@ -13,6 +14,7 @@ jobs:
         run: npm create astro@latest ./my-project -- --template minimal --yes
       - name: Check project
         run: |
+          cd my-project
           # Show Node.js version
           node --version
           # Show TypeScript version
@@ -21,11 +23,13 @@ jobs:
           tsc
       - name: Add import alias to tsconfig.json
         run: |
+          cd my-project
           # Edit tsconfig.json
-          '.compilerOptions.paths = {"@components/*": ["src/components/*"]}' tsconfig.json > tsconfig.tmp && mv tsconfig.tmp tsconfig.json
+          jq '.compilerOptions.paths = {"@components/*": ["src/components/*"]}' tsconfig.json > tsconfig.tmp && mv tsconfig.tmp tsconfig.json
           # Show new tsconfig.json content
           cat tsconfig.json
       - name: Check project again
         run: |
+          cd my-project
           # Run TypeScript compiler (fails)
           tsc
